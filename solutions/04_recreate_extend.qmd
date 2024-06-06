@@ -1,0 +1,33 @@
+---
+title: "Group Exercise"
+format: html
+editor: visual
+---
+
+## Recreate
+
+In this section, your challenge is to work with your small group to recreate the object shown below. This is a tibble with three columns derived from the `demographics` table. Use the empty code chunk to write the code to recreate this tibble.
+
+![](../exercises/recreate_tbl.png)
+
+```{r}
+# Your code here!
+
+
+```
+
+## Extend
+
+The purpose of the *Extend* part is for you to explore what you've learned on your own and try to take it a step further as a group.
+
+For example, you might want to embellish the visualization from the previous exercise. Or you might want to look up the [REDCapTidieR documentation](https://chop-cgtinformatics.github.io/REDCapTidieR/reference/index.html) and try out some of its other functions such as `make_labelled()` or `write_redcap_xlsx()`.
+
+After the time is over, each group will briefly present what they've worked on.
+
+Use the empty code chunk below!
+
+```{r}
+# Your code here! :)
+
+
+```

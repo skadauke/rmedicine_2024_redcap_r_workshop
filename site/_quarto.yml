@@ -1,0 +1,29 @@
+project:
+  type: website
+
+website:
+  title: "REDCap + R: How to Do All the Things!"
+  navbar:
+    logo: "images/redcap-logo.png"
+    left:
+      - href: index.qmd
+        text: Home
+      - href: about.qmd
+        text: About
+    right:
+      - text: "REDCapCon 2023"
+        href: https://projectredcap.org/about/redcapcon/
+      - icon: github
+        href: https://github.com/skadauke/redcapcon_2023_redcap_r_workshop
+        aria-label: GitHub
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: true
+    
+filters:
+  - newpagelink
+
+

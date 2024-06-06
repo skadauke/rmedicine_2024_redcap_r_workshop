@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Advanced API Tasks REDCap using REDCapR</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="03_advanced_files/libs/clipboard/clipboard.min.js"></script>
+<script src="03_advanced_files/libs/quarto-html/quarto.js"></script>
+<script src="03_advanced_files/libs/quarto-html/popper.min.js"></script>
+<script src="03_advanced_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="03_advanced_files/libs/quarto-html/anchor.min.js"></script>
+<link href="03_advanced_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="03_advanced_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="03_advanced_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="03_advanced_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="03_advanced_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Advanced API Tasks REDCap using REDCapR</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>To start this final section, we will upload data using <a href="https://ouhscbbmc.github.io/REDCapR">REDCapR</a>. Let’s install with the newest version of REDCapR from GitHub.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">packageVersion</span>(<span class="st">"REDCapR"</span>) <span class="sc">&lt;</span> <span class="st">"1.1.9005"</span>) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"remotes"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"OuhscBbmc/REDCapR"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="write-data-part-1-intro" class="level1">
+<h1>Write Data Part 1: Intro</h1>
+<p>Writing data <em>to</em> REDCap is more difficult than reading data <em>from</em> REDCap. When you read, you receive data in the structure that the REDCap provides you. You have some control about the columns, rows, and data types, but there is not a lot you have to be concerned.</p>
+<p>In contrast, the structure of the dataset you <em>send</em> to the REDCap server must be precise. You need to pass special variables so that the REDCap server understands the hierarchical structure of the data points.</p>
+<p>We’ll talk through that process, but not actually write/upload. Because we’d step on each other’s toes using the same REDCap server.</p>
+<p>We’ll use a different dataset that’s simpler, so the uploading concepts will be quicker to cover.</p>
+<section id="strategy" class="level2">
+<h2 class="anchored" data-anchor-id="strategy">Strategy</h2>
+<p>REDCapTidieR makes your life easier when you read from a project with longitudinal or repeating structures. It breaks down the calls for each part and hands you tidy rectangles with clean grains.</p>
+<p>But no package holds your hand for <em>writing</em> to REDCap. Instead you’ll need to create a tidy grain for each rectangle/data.frame, and upload each in a separate call.</p>
+<p>As described in REDCapR’s <a href="https://ouhscbbmc.github.io/REDCapR/articles/longitudinal-and-repeating.html">Retrieving Longitudinal and Repeating Structures</a> vignette, the best way to read and write data from projects with longitudinal/repeating elements is to break up the “block matrix” dataset into individual datasets. Each rectangle should have a coherent grain.</p>
+<section id="steps" class="level3">
+<h3 class="anchored" data-anchor-id="steps">Steps</h3>
+<p>Following this strategy, we’ll write to the REDCap server in two distinct steps:</p>
+<ol type="1">
+<li>Upload the patient-level instrument(s)</li>
+<li>Upload the each repeating instrument separately.</li>
+</ol>
+<p>The actual upload phase is pretty straight-forward –it’s just a call to <code>REDCapR::redcap_write()</code>. Most of the code prepares the dataset so that the upload will run smoothly.</p>
+</section>
+</section>
+<section id="retrieve-token" class="level2">
+<h2 class="anchored" data-anchor-id="retrieve-token">Retrieve Token</h2>
+<p>Please closely read the <a href="https://ouhscbbmc.github.io/REDCapR/articles/workflow-read.html#part-2---retrieve-protected-token">Retrieve Protected Token</a> section, which has important security implications. The current vignette imports a fake dataset into REDCap, and we’ll use a token stored in a local file.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># retrieve-credential</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>path_credential <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">"misc/example.credentials"</span>, <span class="at">package =</span> <span class="st">"REDCapR"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>credential  <span class="ot">&lt;-</span> REDCapR<span class="sc">::</span><span class="fu">retrieve_credential_local</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">path_credential =</span> path_credential,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">project_id      =</span> <span class="dv">3748</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(credential<span class="sc">$</span>redcap_uri, credential<span class="sc">$</span>token)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="datasets-to-write-to-server" class="level2">
+<h2 class="anchored" data-anchor-id="datasets-to-write-to-server">Datasets to Write to Server</h2>
+<p>To keep this vignette focused on writing/importing/uploading to the server, we’ll start with the data that needs to be written. These example tables were prepared by <a href="https://github.com/RaymondBalise">Raymond Balise</a> for our 2023 <a href="https://events.linuxfoundation.org/r-medicine/">R/Medicine</a> workshop, “Using REDCap and R to Rapidly Produce Biomedical Publications”.</p>
+<p>There are two tables, each with a different <a href="https://www.1keydata.com/datawarehousing/fact-table-granularity.html">granularity</a>:</p>
+<ul>
+<li><code>ds_patient</code>: each row represents one patient,</li>
+<li><code>ds_daily</code>: each row represents one daily measurement per patient.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load-patient</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds_patient <span class="ot">&lt;-</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"test-data/vignette-repeating-write/data-patient.rds"</span> <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">"REDCapR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  readr<span class="sc">::</span><span class="fu">read_rds</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ds_patient</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load-repeating</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_daily <span class="ot">&lt;-</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"test-data/vignette-repeating-write/data-daily.rds"</span> <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">"REDCapR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  readr<span class="sc">::</span><span class="fu">read_rds</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ds_daily</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="write-data-part-2-one-row-per-patient" class="level1">
+<h1>Write Data Part 2: One row per patient</h1>
+<p>Besides the <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html"><code>data.frame</code></a> to write to REDCap, the only required arguments of the <a href="https://ouhscbbmc.github.io/REDCapR/reference/redcap_write.html"><code>REDCapR::redcap_write()</code></a> function are <code>redcap_uri</code> and <code>token</code>; both are contained in the credential object created in the previous section.</p>
+<p>As discussed in the <a href="https://ouhscbbmc.github.io/REDCapR/articles/TroubleshootingApiCalls.html#writing">Troubleshooting vignette</a>, we recommend running these two preliminary checks before trying to write the dataset to the server for the very first time.</p>
+<section id="prep-stoplight-fields" class="level2">
+<h2 class="anchored" data-anchor-id="prep-stoplight-fields">Prep: Stoplight Fields</h2>
+<p>If the REDCap project isn’t longitudinal and doesn’t have arms, uploading a patient-level data.frame to REDCap doesn’t require adding variables. However we typically populate the <code>*_complete</code> variables to communicate the record’s status.</p>
+<p>If the row is needs a human to add more values or inspect the existing values consider <a href="https://ouhscbbmc.github.io/REDCapR/reference/constant.html">marking the instrument</a> “incomplete” or “unverified”; the patient’s instrument record will appear red or yellow in REDCap’s Record Dashboard. Otherwise consider marking the instrument “complete” so it will appear green.</p>
+<p>With this example project, the only patient-level instrument is “enrollment”, so the corresponding variable is <code>enrollment_complete</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># patient-complete</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds_patient <span class="ot">&lt;-</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  ds_patient <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">enrollment_complete   =</span> REDCapR<span class="sc">::</span><span class="fu">constant</span>(<span class="st">"form_complete"</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="prep-redcaprvalidate_for_write" class="level2">
+<h2 class="anchored" data-anchor-id="prep-redcaprvalidate_for_write">Prep: <code>REDCapR::validate_for_write()</code></h2>
+<p><code>REDCapR::validate_for_write()</code> inspects a data frame to anticipate potential problems before writing with REDCap’s API. A tibble is returned, with one row per potential problem (and a suggestion how to avoid it). Ideally an 0-row tibble is returned.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>REDCapR<span class="sc">::</span><span class="fu">validate_for_write</span>(ds_patient, <span class="at">convert_logical_to_integer =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you encounter problems that can be checked with automation, please tell us in <a href="https://github.com/OuhscBbmc/REDCapR/issues">an issue</a>. We’ll work with you to incorporate the new check into <code>REDCapR::validate_for_write()</code>.</p>
+<p>When a dataset’s problems are caught before reaching the server, the solutions are easier to identify and implement.</p>
+</section>
+<section id="prep-write-small-subset-first" class="level2">
+<h2 class="anchored" data-anchor-id="prep-write-small-subset-first">Prep: Write Small Subset First</h2>
+<p>If this is your first time with a complicated project, consider loading a small subset of rows and columns. In this case, we start with only three columns and two rows.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># patient-subset</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ds_patient <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(              <span class="co"># First three columns</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    id_code,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    date,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    is_mobile,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) <span class="sc">|&gt;</span>        <span class="co"># First two rows</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  REDCapR<span class="sc">::</span><span class="fu">redcap_write</span>(</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ds_to_write =</span> _,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">redcap_uri  =</span> credential<span class="sc">$</span>redcap_uri,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">token       =</span> credential<span class="sc">$</span>token,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">convert_logical_to_integer =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="prep-recode-variables-where-necessary" class="level2">
+<h2 class="anchored" data-anchor-id="prep-recode-variables-where-necessary">Prep: Recode Variables where Necessary</h2>
+<p>Some variables in the data.frame might be represented differently than in REDCap.</p>
+<p>A common transformation is changing strings into the integers that underlie radio buttons. Common approaches are <a href="https://dplyr.tidyverse.org/reference/case_match.html"><code>dplyr::case_match()</code></a> and using joining to lookup tables (if the mappings are expressed in a csv). Here’s an in-line example of <code>dplyr::case_match()</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ds_patient <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  ds_patient <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">case_match</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        race,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"White"</span>                       <span class="sc">~</span>  1L,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Black or African American"</span>   <span class="sc">~</span>  2L,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Asian"</span>                       <span class="sc">~</span>  3L,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Native American"</span>             <span class="sc">~</span>  4L,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Pacific Islander"</span>            <span class="sc">~</span>  5L,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Multiracial"</span>                 <span class="sc">~</span>  6L,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Refused or don't know"</span>       <span class="sc">~</span>  7L</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/codebook-race.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Codebook entry for Race</figcaption>
+</figure>
+</div>
+</section>
+<section id="write-entire-patient-level-table" class="level2">
+<h2 class="anchored" data-anchor-id="write-entire-patient-level-table">Write Entire Patient-level Table</h2>
+<p>If the small subset works, we usually jump ahead and try all columns and rows.</p>
+<p>If this larger table fails, split the difference between (a) the smaller working example and (b) the larger failing example. See if this middle point (that has fewer rows and/or columns than the failing point) succeeds or fails. Then repeat. This “bisection” or “binary search” <a href="https://medium.com/codecastpublication/debugging-tools-and-techniques-binary-search-2da5bb4282c7">debugging technique</a> is helpful in many areas of programming and statistical modeling.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># patient-entire</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ds_patient <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  REDCapR<span class="sc">::</span><span class="fu">redcap_write</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">ds_to_write =</span> _,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">redcap_uri  =</span> credential<span class="sc">$</span>redcap_uri,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">token       =</span> credential<span class="sc">$</span>token,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">convert_logical_to_integer =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="write-data-part-3-repeating-instrument" class="level1">
+<h1>Write Data Part 3: Repeating Instrument</h1>
+<section id="add-plumbing-variables" class="level2">
+<h2 class="anchored" data-anchor-id="add-plumbing-variables">Add Plumbing Variables</h2>
+<p>As stated in the vignette’s intro, the structure of the dataset uploaded to the server must be precise. When uploading repeating instruments, there are several important columns:</p>
+<ol type="1">
+<li><code>record_id</code>: typically indicates the patient’s id. (This field can be renamed for the project.)</li>
+<li><code>redcap_event_name</code>: If the project is longitudinal or has arms, this indicates the event. Otherwise, you don’t need to add this variable.</li>
+<li><code>redcap_repeat_instrument</code>: Indicates the instrument/form that is repeating for these columns.</li>
+<li><code>redcap_repeat_instance</code>: Typically a sequential positive integer (<em>e.g.</em>, 1, 2, 3, …) indicating the order.</li>
+</ol>
+<p>The combination of these variables needs to be unique. Please read the <a href="https://ouhscbbmc.github.io/REDCapR/articles/longitudinal-and-repeating.html">Retrieving Longitudinal and Repeating Structures</a> vignette for details of these variables and their meanings.</p>
+<p>You need to pass specific variables so that the REDCap server understands the hierarchical structure of the data points.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># repeat-plumbing</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ds_daily <span class="ot">&lt;-</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  ds_daily <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(id_code) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">redcap_repeat_instrument  =</span> <span class="st">"daily"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">redcap_repeat_instance    =</span> dplyr<span class="sc">::</span><span class="fu">row_number</span>(da_date),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">daily_complete            =</span> REDCapR<span class="sc">::</span><span class="fu">constant</span>(<span class="st">"form_complete"</span>),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    id_code,                        <span class="co"># Or `record_id`, if you didn't rename it</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># redcap_event_name,            # If the project is longitudinal or has arms</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    redcap_repeat_instrument,       <span class="co"># The name of the repeating instrument/form</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    redcap_repeat_instance,         <span class="co"># The sequence of the repeating instrument</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    tidyselect<span class="sc">::</span><span class="fu">everything</span>(),       <span class="co"># All columns not explicitly passed to `dplyr::select()`</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    daily_complete,                 <span class="co"># Indicates incomplete, unverified, or complete</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for potential problems.  (Remember zero rows are good.)</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>REDCapR<span class="sc">::</span><span class="fu">validate_for_write</span>(ds_daily, <span class="at">convert_logical_to_integer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>ds_daily</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># daily-entire</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ds_daily <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  REDCapR<span class="sc">::</span><span class="fu">redcap_write</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">ds_to_write =</span> _,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">redcap_uri  =</span> credential<span class="sc">$</span>redcap_uri,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">token       =</span> credential<span class="sc">$</span>token,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">convert_logical_to_integer =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="write-data-part-4---next-steps" class="level1">
+<h1>Write Data Part 4 - Next Steps</h1>
+<section id="more-complexity" class="level2">
+<h2 class="anchored" data-anchor-id="more-complexity">More Complexity</h2>
+<p>This vignette required only two data.frames, but more complex projects sometimes need more. For example, each repeating instrument should be its own data.frame and writing step. Arms and longitudinal events need to be considered too.</p>
+</section>
+<section id="batching" class="level2">
+<h2 class="anchored" data-anchor-id="batching">Batching</h2>
+<p>By default, <code>REDCapR::redcap_write()</code> requests datasets of 100 patients as a time, and stacks the resulting subsets together before returning a data.frame. This can be adjusted to improve performance; the ‘Details’ section of <code>REDCapR::redcap_write()</code> discusses the trade offs.</p>
+<p>I usually shoot for ~10 seconds per batch.</p>
+</section>
+<section id="manual-vs-api" class="level2">
+<h2 class="anchored" data-anchor-id="manual-vs-api">Manual vs API</h2>
+<p>Manual downloading/uploading might make sense if you’re do the operation only once. But when does it ever stop after the first time?</p>
+<p>If you have trouble uploading, consider adding a few fake patients &amp; measurements and then download the csv. It might reveal something you didn’t anticipate. But be aware that it will be in the block matrix format (<em>i.e.</em>, everything jammed into one rectangle.)</p>
+</section>
+</section>
+<section id="column-types" class="level1">
+<h1>Column Types</h1>
+<p>The data type of each variable can make a big difference to the reliability of a script. REDCap’s underlying <code>redcap_data</code> table in MySQL/MariaDB is text. But analyses in R do better when they’re cast appropriately to numbers &amp; dates.</p>
+<p>If you’re doing basic analyses in R, you’ve probably used the <a href="https://readr.tidyverse.org/">readr</a> package to convert the text of a CSV to an R data frame. Under the hood, packages like REDCapR use readr to convert the text from REDCap to produce a data frame.</p>
+<p>Three reasonable options when reading from REDCap are:</p>
+<ol type="1">
+<li><p>Let <a href="https://readr.tidyverse.org/reference/read_delim.html"><code>readr::read_csv()</code></a> make it’s best guess.</p></li>
+<li><p>Keep everything as a string/character, as it lives in <code>redcap_data</code>.</p></li>
+<li><p>Ask <a href="https://ouhscbbmc.github.io/REDCapR/reference/redcap_metadata_coltypes.html"><code>REDCapR::redcap_metadata_coltypes()</code></a> to inspect project &amp; variable settings to infer the likely type. Then pass this specification to <a href="https://ouhscbbmc.github.io/REDCapR/reference/redcap_read.html"><code>REDCapR::redcap_read()</code></a>’s <code>col_types</code> parameter, which is ultimately used by <code>readr::read_csv()</code>.</p>
+<img src="images/coltypes.png" class="img-fluid" alt="coltypes"></li>
+</ol>
+</section>
+<section id="token-security" class="level1">
+<h1>Token Security</h1>
+<p>Several good approaches exist for securely handling passwords. (Two years ago I started a <a href="https://github.com/vanderbilt-redcap/redcap-token-committee-private">group to catalog them</a>, but then I dropped the ball.)</p>
+<p>Talk with your institution’s IT Security team about options for your campus.</p>
+<p>Three goals, in descending priority:</p>
+<ol type="1">
+<li>Don’t let the token/password fall into the wrong hands.</li>
+<li>Use personal tokens so the audit trail is meaningful.</li>
+<li>Adding tokens shouldn’t be a hassle. Ideally it’s automatic.</li>
+</ol>
+<section id="bad-options" class="level2">
+<h2 class="anchored" data-anchor-id="bad-options">Bad Options</h2>
+<ol type="1">
+<li><p>Harded-coded. Fails all three goals. It’s appropriate for only demo projects without PHI.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>uri     <span class="ot">&lt;-</span> <span class="st">"https://bbmc.ouhsc.edu/redcap/api/"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>token   <span class="ot">&lt;-</span> <span class="st">"9A81268476645C4E5F03428B8AC3AA7B"</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>REDCapR<span class="sc">::</span><span class="fu">redcap_dag_read</span>(<span class="at">redcap_uri=</span>uri, <span class="at">token=</span>token)<span class="sc">$</span>data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Save credentials in an unsecured file</p></li>
+</ol>
+</section>
+<section id="good-options" class="level2">
+<h2 class="anchored" data-anchor-id="good-options">Good Options</h2>
+<ol type="1">
+<li><p>Save credentials in an unsecured file. Then use something like</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>credential <span class="ot">&lt;-</span> REDCapR<span class="sc">::</span><span class="fu">retrieve_credential_local</span>(path_credential, 18L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Environmental variables. But they’re more difficult for portability &amp; reproducibilty.</p></li>
+<li><p><a href="https://CRAN.R-project.org/package=keyring">Keyring</a> package solutions. Good for security &amp; audits, but doesn’t scale well across lots of projects &amp; users.</p></li>
+<li><p><a href="https://ouhscbbmc.github.io/REDCapR/articles/SecurityDatabase.html">Token Server</a>. Is my preference, but it takes a few hours to establish. It leverages a separate database’s connection with Active Directory (ie, “integrated security”). Users never have to manually save or retrieve tokens as long as they’re on the same network as the “token server” database.</p></li>
+</ol>
+</section>
+</section>
+<section id="more-redcapr-documentation" class="level1">
+<h1>More REDCapR Documentation</h1>
+<p><a href="https://ouhscbbmc.github.io/" class="uri">https://ouhscbbmc.github.io/</a></p>
+<p>For a more thorough explanation of analytical approaches, go to REDCapR’s website. Including the 7 vignettes like</p>
+<ul>
+<li><a href="https://ouhscbbmc.github.io/REDCapR/articles/workflow-read.html">Typical REDCap Workflow for a Data Analyst</a>,</li>
+<li><a href="https://ouhscbbmc.github.io/REDCapR/articles/longitudinal-and-repeating.html">Retrieving Longitudinal and Repeating Structures</a>, and especially</li>
+<li><a href="https://ouhscbbmc.github.io/REDCapR/articles/TroubleshootingApiCalls.html">Troubleshooting REDCap API Calls</a>.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/redcapr-site.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">coltypes</figcaption>
+</figure>
+</div>
+</section>
+<section id="other-packages-in-the-redcap-ecosystem" class="level1">
+<h1>Other Packages in the REDCap Ecosystem</h1>
+<p><a href="https://github.com/OuhscBbmc/REDCapR">REDCapR</a> &amp; <a href="https://github.com/CHOP-CGTInformatics/REDCapTidieR">REDCapTidier</a> are just of of 10+ actively-developed packages.</p>
+<p><a href="https://redcap-tools.github.io/projects/">REDCap Tools</a> (redcap-tools.github.io/) was created by a people to help inventory the evolving list of packages. Most people using the REDCap API are not REDCap admins, so they don’t have access to the Community forums.</p>
+<p>The most relevant packages to this audience include:</p>
+<ul>
+<li><a href="https://github.com/nutterb/redcapAPI">redcapAPI</a> for R: recently handed from Ben Nutter to Vandy developers</li>
+<li><a href="https://github.com/raymondbalise/tidyREDCap">tidyREDCap</a> for R: Raymond Balise of U Miami has fxs for scenarios we haven’t discussed today)</li>
+<li><a href="https://github.com/ubidi/REDCapDM">REDCapDM</a> for R: –João Carmezim</li>
+<li><a href="https://github.com/ctsit/redcapcustodian/">REDCap Custodian</a> for R: Philip Chase &amp; Kyle Chesney of U Florida</li>
+<li><a href="https://github.com/redcap-tools/PyCap">PyCap</a>: similar goals as REDCapR –maintained by Paul Wildenhain of CHOP</li>
+<li><a href="https://github.com/cctrbic/redcap-api">redcap-api</a> for C#: Michael Tran of VCU (inspired by Chris Nefcy)</li>
+<li><a href="https://github.com/iuredcap/phpcap">phpcap</a>: more focused on server tasks –maintained by Jim Mullen &amp; Andy Arenson of U Indiana</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

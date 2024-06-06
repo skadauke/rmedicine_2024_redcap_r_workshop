@@ -1,0 +1,68 @@
+---
+title: "Transforming and Visualizing Data With R"
+format: html
+editor: visual
+---
+
+## Fevers after CAR-T infusion?
+
+Your study PI wants to know if any of the study patients have developed a fever during the first hour after their CAR-T cell infusion. Fever can be the first sign of [cytokine release syndrome](https://en.wikipedia.org/wiki/Cytokine_release_syndrome), a frequent and significant complication of CAR-T cell therapy.
+
+Temperature measurements after infusion are stored in the `infusion_vital_signs` instrument. Our goal will be to extract these temperature measurements and then use **ggplot2** to draw temperature curves for each patient.
+
+Make sure to have the `tidyverse` package loaded by running the following code chunk:
+
+```{r}
+library(tidyverse)
+```
+
+Let's take a look at the infusion vitals table. We can use the `extract_tibble()` function to extract a data tibble from `redcart`. Fill in the blank below to extract the `infusion_vital_signs` tibble.
+
+Hint: make sure to put `infusion_vital_signs` in quotes!
+
+```{r}
+infusion_vitals <- redcart |> extract_tibble("infusion_vital_signs")
+```
+
+Take a look at the `infusion_vitals` tibble. You will notice that it is in **wide format** - with one row per infused patient. However to use ggplot we will need to pivot the data into **long** format - with one row per temperature measurement. We can use the `pivot_longer()` function for this.
+
+In addition, there are some columns we don't need. And we have to remove any data that don't reflect temperatures after infusion.
+
+We can use a single tidyverse pipeline to accomplish all of that! Read the comments for hints to fill in the blanks.
+
+Hint: when building or troubleshooting a lengthy tidyverse pipeline, it can be very useful to execute just a *part* of it. You can do this by *highlighting* the part of the pipeline that you want to run (excluding the final `|>` !) and then hitting Ctrl+Enter (on Windows) or Cmd+Enter (on macOS).
+
+```{r}
+# Start by plugging in the "infusion_vitals" tibble we just created
+temperatures <- infusion_vitals |>
+  # Drop a few columns. Note we use "-" before each column name to drop.
+  select(-infusion_vitals_comments, -redcap_event, -form_status_complete) |>
+  # This next operation turns a wide data into long form. 
+  # Don't worry about this one, it's out of scope for today's session! :)
+  pivot_longer(starts_with("infusion_vitals_")) |>
+  # Keep only the rows that have "_post_temp_" in the name
+  filter(stringr::str_detect(name, "_post_temp_")) |>
+  # Create a new variable "time" based on info the "name" column
+  mutate(time = name |> 
+           str_remove("infusion_vitals_post_temp_") |>
+           as.integer() * 15
+  ) |>
+  rename(temperature = value) |>
+  # Finally, remove the "name" column because we don't need it anymore
+  select(-name)
+
+```
+
+Look at `temperatures` in the *Data Viewer*. Does it have one temperature measurement per row?
+
+Next let's create the temperature curves by plugging `temperatures` into ggplot! We will want to map the `x` axis to `time` and the `y` axis to `temperature`. The geom function to make a line graph is `geom_line()`. Fill in the blanks!
+
+```{r}
+ggplot(
+  data = temperatures, 
+  aes(x = time, y = temperature, color = infseq_id)
+) + 
+  geom_line()
+```
+
+What do you tell your study PI? Did patients develop fevers? **No - all values seem to be in the normal range.**

@@ -1,0 +1,42 @@
+---
+title: "Welcome to the REDCap Workshop!"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto (the successor of **R Markdown**) enables you to weave together *human-readable content* and *executable code* in a single document. We will use Posit Cloud to work with Quarto documents that contain exercises for the session.
+
+## Running Code
+
+In Quarto, executable code is embedded as **code chunks**. They appear with a gray background, like so:
+
+```{r}
+# I'm a code chunk!
+```
+
+When you click the **green triangle** on the top right of the **code chunk**, the code gets run, and the result (if any) will appear underneath.
+
+Here is a code chunk that asks R to calculate the sum of `1 + 1`. Go ahead and run it!
+
+```{r}
+1 + 1
+```
+
+The following code chunk will use the **REDCapR** package to connect to a REDCap database and download its data into an object called `my_redcap_data`. Run the code chunk.
+
+```{r}
+library(REDCapR)
+
+creds <- retrieve_credential_local("../data-private/credentials.csv", 1)
+
+uri <- creds$redcap_uri
+token <- creds$token
+
+my_redcap_data <- redcap_read_oneshot(uri, token)$data
+```
+
+When this runs successfully, it will give you a message that [looks like an error]{style="color:red"} but is really just a status message. The HTTP status code "200" means "success."
+
+So if this ran without an error, pat yourself on the back! You just used R to access the REDCap API via REDCapR and downloaded a project. Pretty cool!

@@ -1,0 +1,160 @@
+---
+title: "Extracting Data from REDCap using REDCapR"
+format: html
+editor: visual
+---
+
+For the first 10 min, we will download data using [REDCapR](https://ouhscbbmc.github.io/REDCapR). Let's install with the newest version of REDCapR from GitHub.
+
+```{r}
+if (packageVersion("REDCapR") < "1.1.9005") {
+  install.packages("remotes")
+  remotes::install_github("OuhscBbmc/REDCapR")
+}
+```
+
+Retrieve Secure Token
+----------------------------
+
+We'll discuss token approaches at the end of the deep dive. 
+For now, know that a "token" is a secret value 
+that serves as your personal password to a specific REDCap project. 
+We'll retrieve it from a file stored in a (pretend) secured directory.
+
+<!-- path_credential <- "redcapcon_2023_redcap_r_workshop/data-private/credentials.csv" -->
+
+```{r}
+path_credential <- "../data-private/credentials.csv"
+credential      <- REDCapR::retrieve_credential_local(path_credential, 1L)
+credential
+```
+
+Peek at Variables, Events, & Instruments
+----------------------------
+
+Stephan created fake data that mimics the real CAR-T investigation. 
+The first snippet reveals info from the 368 variables. 
+The second reveals info about the combinations of events & instruments.
+
+```{r}
+REDCapR::redcap_metadata_read(
+  redcap_uri  = credential$redcap_uri,
+  token       = credential$token
+)$data
+
+REDCapR::redcap_event_instruments(
+  redcap_uri  = credential$redcap_uri,
+  token       = credential$token
+)$data
+```
+
+If important details are obscured, use `View()` to see things in a nice scrollable table inside RStudio:
+
+``` r
+View(
+  REDCapR::redcap_metadata_read( 
+    credential$redcap_uri, 
+    credential$token 
+  )$data
+)
+```
+
+![Variable information](images/view-dictionary.png)
+
+Data Frame Grain
+----------------------------
+
+All your operations are easier when you have a good understanding of the "grain"
+of each table/data.frame.
+
+A table's grain is what each row represents.  
+If one row represents a distinct patient, 
+the table's grain is *patient*.
+If one row represents a single medication administered to a patient,
+the table's grain is *medication*.
+
+If your R data frame has a poorly defined grain
+you'll probably corrupt your data,
+or at least force ugly & brittle hacks into your code.
+
+Grain is so important that I usually my tables are named for it,
+such as `ds_pt` and `ds_med`.
+I like it on the forefront of my mind.
+
+Download Records with a clean grain, part #1
+----------------------------
+
+Downloading records from REDCap is easy for classic projects
+(ie, non-longitudinal & non-repeating). 
+Just pass the url & token to [`REDCapR::redcap_read()`](https://ouhscbbmc.github.io/REDCapR/reference/redcap_read.html).
+
+``` r
+ds <-
+  REDCapR::redcap_read(
+    redcap_uri  = credential$redcap_uri,
+    token       = credential$token
+  )$data
+```
+
+You can also specify constraints like forms, fields, & events 
+to make the dataset tight and relevant.
+
+```{r}
+ds_pt <-
+  REDCapR::redcap_read(
+    redcap_uri  = credential$redcap_uri,
+    token       = credential$token,
+    # forms       = c("infusion_sequence", "demographics"),
+    fields      = c("infseq_id", "demo_mrn", "demo_birth_date", "demo_age"),
+    events      = "screening__enrollm_arm_1",
+    verbose     = FALSE
+  )$data
+  
+# View(ds_pt)
+```
+
+![Patient-level records](images/view-pt.png)
+
+Download Records with a dirty grain
+----------------------------
+
+```{r}
+ds_mishmash <-
+  REDCapR::redcap_read(
+    redcap_uri  = credential$redcap_uri,
+    token       = credential$token,
+    verbose     = FALSE
+  )$data
+```
+
+![Mishmash grain](images/view-mishmash.png)
+
+Download Records with a clean grain, part #2
+----------------------------
+
+```{r}
+ds_med <-
+  REDCapR::redcap_read(
+    redcap_uri    = credential$redcap_uri,
+    token         = credential$token,
+    fields        = c("medhx_conditionhx", "medhx_start_date", "medhx_grade_1"),
+    events        = "screening__enrollm_arm_1",
+    filter_logic  = "[medhx_conditionhx] != ''",
+    verbose       = FALSE
+  )$data
+
+ds_med |>
+  dplyr::select(
+    infseq_id,
+    # redcap_event_name,
+    # redcap_repeat_instrument,
+    med_instance  = redcap_repeat_instance,
+    condition_hx  = medhx_conditionhx,
+    start_date    = medhx_start_date,
+    grade_1       = medhx_grade_1
+  ) |>
+  dplyr::mutate(
+    med_instance  = as.integer(med_instance),
+    grade_1       = as.integer(grade_1),
+  )
+```

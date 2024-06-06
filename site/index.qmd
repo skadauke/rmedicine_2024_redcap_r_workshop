@@ -1,0 +1,86 @@
+---
+title: "REDCap + R: How to Do All the Things!"
+description: A gentle introduction to using R with REDCap databases using the REDCapR and REDCapTidieR packages.
+author:
+  - name: Stephan Kadauke
+    url: https://www.linkedin.com/in/skadauke/
+    affiliation: Children's Hospital of Philadelphia
+  - name: Will Beasley
+    url: https://ouhsc.edu/bbmc/team/#willbeasley
+    affiliation: Oklahoma University
+format: 
+  html:
+    theme: flatly
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Welcome!
+
+This is the website for the REDCapCon Deep Dive *REDCap + R: How to Do All the Things!*
+
+You'll learn about [Quarto](https://quarto.org/), a framework for reproducible data science, and how to use REDCap with R to download projects, perform data analysis and visualization, and how to write data back to REDCap.
+
+For the best experience, we suggest the following (none of the below are absolutely necessary!):
+
+-   If available to you, use two monitors (or another two-screen setup such as a laptop and a tablet or two laptops).
+-   We suggest you use a recent version of macOS or Windows - we have had issues with Linux.
+-   We highly recommend you use the Google Chrome browser to access the Posit Cloud training environment.
+
+## Pre-work
+
+### Essential
+
+-   Install the latest version of [Google Chrome](https://www.google.com/chrome/).
+-   We will use Posit Cloud as a backup training environment. Please sign up for a free account [here](https://rstudio.cloud).
+
+### Optional
+
+-   Install [R](https://cloud.r-project.org/) and [RStudio Desktop](https://rstudio.com/products/rstudio/download/) on your computer. We made video with step by step instructions for installing these on macOS ([here](https://www.youtube.com/watch?v=GM88tYlEy_g)) or Windows ([here](https://www.youtube.com/watch?v=JRKmZK5-6aE)).
+-   Here are the PowerPoint slides for download:
+    -   [00 - Welcome](https://github.com/skadauke/redcapcon_2023_redcap_r_workshop/raw/main/slides/00_welcome.pptx)
+    -   [01 - Extract and Explore](https://github.com/skadauke/redcapcon_2023_redcap_r_workshop/raw/main/slides/01_extract_explore.pptx)
+    -   [02 - Transform and Visualize](https://github.com/skadauke/redcapcon_2023_redcap_r_workshop/raw/main/slides/02_transform_visualize.pptx)
+    -   [03 - Advanced REDCapR](https://github.com/skadauke/redcapcon_2023_redcap_r_workshop/raw/main/slides/03_advanced_redcapr.pptx)
+    -   [04 - Recreate and Extend](https://github.com/skadauke/redcapcon_2023_redcap_r_workshop/raw/main/slides/04_recreate_extend.pptx)
+
+## Going through the course
+
+We have recorded the session and made it available on [YouTube](TODO).
+
+We have created an online training environment with interactive exercises that are referenced in the YouTube recording. The training environment can be accessed [here](https://posit.cloud/content/6465016).
+
+The entire course should take about 2 hours to complete.
+
+## After the course
+
+If you would like to practice with the materials from the course, go to the [GitHub repository](https://github.com/skadauke/intro-to-r-for-clinical-data-rmed2022), and click the green button labeled "Code" to download the repository as a .ZIP file.
+
+To install all the packages we used in the training environment, open RStudio and run the following command in the Console:
+
+```{r, eval = FALSE, echo = TRUE}
+install.packages(c(
+  "tidyverse",
+  "REDCapR",
+  "REDCapTidieR"
+))
+```
+
+## Resources
+
+-   [REDCapR Documentation](https://ouhscbbmc.github.io/REDCapR/)
+-   [REDCapTidieR Documentation](https://chop-cgtinformatics.github.io/REDCapTidieR/)
+-   [R for Data Science](https://r4ds.hadley.nz/) (by Hadley Wickham, Mine Çetinkya-Rundel, and Garrett Grolemund)
+-   [Quarto](https://quarto.org/)
+-   [RStudio/Posit Cheatsheets](https://rstudio.com/resources/cheatsheets/)
+
+## License
+
+All of the material in this GitHub repository is copyrighted under the [Creative Commons BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) copyright to make the material easy to reuse. We encourage you to reuse it and adapt it for your own teaching as you like!
+
+## Acknowledgments {.appendix}
+
+This course draws from various sources, most notably Garrett Grolemund's [Welcome to the Tidyverse](https://github.com/rstudio-education/welcome-to-the-tidyverse) and Greg Wilson's [Teaching Tech Together](http://teachtogether.tech/en/). This site was built using [Quarto](https://quarto.org/).
