@@ -8,23 +8,12 @@ editor: visual
 
 In this section, your challenge is to work with your small group to recreate the object shown below. This is a tibble with three columns derived from the `demographics` table. Use the empty code chunk to write the code to recreate this tibble.
 
-![](recreate_tbl.png){width="494"}
+![](../exercises/recreate_tbl.png)
 
 ```{r}
 # Your code here!
 
-library(REDCapR)
 
-creds <- retrieve_credential_local("../data-private/credentials.csv", 1)
-
-uri <- creds$redcap_uri
-token <- creds$token
-
-redcart <- read_redcap(uri, token)
-
-redcart |>
-  extract_tibble("demographics") |>
-  select(infseq_id, demo_last_name, demo_birth_date)
 ```
 
 ## Extend
