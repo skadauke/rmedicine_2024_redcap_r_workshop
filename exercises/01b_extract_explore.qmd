@@ -1,0 +1,54 @@
+---
+title: "Extracting and Exploring REDCap Data in R"
+format: html
+editor: visual
+---
+
+## Extracting Data from REDCap using REDCapTidieR
+
+In this exercise, we will download REDCap data using REDCapTidier (as opposed to REDCapR) and then explore that data using the Posit IDE.
+
+```{r}
+library(REDCapTidieR)
+
+# Load credentials from CSV file
+creds <- REDCapR::retrieve_credential_local("../data-private/credentials.csv", 1)
+
+uri <- creds$redcap_uri
+token <- creds$token
+
+# Read the CAR-T cell REDCap data into an object named "redcart"
+redcart <- read_redcap(uri, token)
+
+# Show me redcart!
+redcart
+```
+
+## Exploring the REDCapTidieR Supertibble
+
+Take a look at the *Environment* pane to the right. Note that there is an object named `redcart`. This is the **supertibble** you just created inside of R's memory. (If you don't see `redcart`, try running the code chunk above again).
+
+A **tibble** (or **data frame**) is a tabular data structure with rows and columns, similar to a SQL database or an Excel sheet. A **supertibble** is a tibble that contains tibbles. This is a special data structure that is useful to represent a REDCap project.
+
+Look again at the *Environment* pane. On the far right next to `redcart`, you will spot an small icon that looks like a table. Click on it to make the *Data Viewer* appear.
+
+The *Data Viewer* is a handy way to explore tibble built into the Posit IDE.
+
+Go ahead an explore `redcart` to confirm the following features of the supertibble:
+
+1.  Each row represents a REDCap instrument.
+2.  In addition to the instrument's name, useful instrument-level metadata is shown here.
+3.  The `redcap_data` column contains tibbles (note the little table icons!)
+4.  By clicking on a tibble object inside the `redcap_data` column you can *drill down* and view the data stored in a specific REDCap instrument.
+
+Without writing any code, just by working in the *Data Viewer*, try to answer the following questions:
+
+1.  How many instruments are in the `redcart` database?
+
+2.  How many rows are in the `demographics` table?
+
+3.  Is the `consent` instrument repeating or nonrepeating? How can you tell? Why or why not?
+
+4.  Drill down into the `demographics` instrument. How many patients are captured in here? Who is the oldest patient on the trial?
+
+**NOTE: Studies have shown that explaining material you just learned to others can boost memory. So if you're done early, you might want to get up and help out others! :)**
