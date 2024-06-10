@@ -13,6 +13,7 @@ Temperature measurements after infusion are stored in the `infusion_vital_signs`
 Make sure to have the `tidyverse` package loaded by running the following code chunk:
 
 ```{r}
+#| include: false
 library(tidyverse)
 ```
 
