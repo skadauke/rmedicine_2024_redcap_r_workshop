@@ -12,7 +12,7 @@ In this exercise, we will download REDCap data using REDCapTidier (as opposed to
 library(REDCapTidieR)
 
 # Load credentials from CSV file
-creds <- REDCapR::retrieve_credential_local("../data-private/credentials.csv", 1)
+creds <- REDCapR::retrieve_credential_local(here::here("data-private", "credentials.csv"), 1)
 
 uri <- creds$redcap_uri
 token <- creds$token
