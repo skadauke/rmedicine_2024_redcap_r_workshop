@@ -29,7 +29,16 @@ In this next code chunk, we'll install all of the necessary packages for the wor
 ```{r}
 #| include: false
 
-install.packages(c("rmarkdown", "tidyverse", "REDCapTidieR"))
+install.packages(
+  c(
+    "rmarkdown", 
+    "tidyverse", 
+    "REDCapTidieR",
+    "here",
+    "openxlsx2",
+    "labelled"
+  )
+)
 
 if (packageVersion("REDCapR") < "1.1.9005") {
   install.packages("remotes")
