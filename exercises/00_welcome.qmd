@@ -42,7 +42,7 @@ The following two code chunks will use the **REDCapR** package to connect to a R
 ```{r}
 library(REDCapR)
 
-creds <- retrieve_credential_local("../data-private/credentials.csv", 1)
+creds <- retrieve_credential_local(here::here("data-private", "credentials.csv"), 1)
 
 uri <- creds$redcap_uri
 token <- creds$token

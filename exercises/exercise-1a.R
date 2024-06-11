@@ -1,6 +1,6 @@
 # install.packages("remotes")
 # remotes::install_github("OuhscBbmc/REDCapR")
-path_credential <- "redcapcon_2023_redcap_r_workshop/data-private/credentials.csv"
+path_credential <- here::here("data-private", "credentials.csv")
 credential  <- REDCapR::retrieve_credential_local(path_credential, 1L)
 
 if (FALSE) {
