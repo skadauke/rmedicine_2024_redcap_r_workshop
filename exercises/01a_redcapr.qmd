@@ -20,7 +20,7 @@ We'll discuss token approaches at the end of the deep dive. For now, know that a
 <!-- path_credential <- "redcapcon_2023_redcap_r_workshop/data-private/credentials.csv" -->
 
 ```{r}
-path_credential <- "../data-private/credentials.csv"
+path_credential <- here::here("data-private", "credentials.csv")
 credential      <- REDCapR::retrieve_credential_local(path_credential, 1L)
 credential
 ```
