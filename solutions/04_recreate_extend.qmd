@@ -13,7 +13,7 @@ In this section, your challenge is to work with your small group to recreate the
 ```{r}
 # Your code here!
 
-library(REDCapR)
+library(REDCapTidieR)
 
 creds <- retrieve_credential_local("../data-private/credentials.csv", 1)
 
